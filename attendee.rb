@@ -1,4 +1,32 @@
-require 'ostruct'
+class Attendee
+
+  attr_accessor :first_name, :last_name, :dirty_zipcode,
+                :email_address, :street, :city, :state, :dirty_phone_number
+
+  def initialize(attributes)
+    self.first_name          = attributes[:first_name]
+    self.last_name           = attributes[:last_name]
+    self.dirty_zipcode       = attributes[:zipcode]
+    self.email_address       = attributes[:email_address]
+    self.street              = attributes[:street]
+    self.city                = attributes[:city]
+    self.state               = attributes[:state]
+    self.dirty_phone_number  = attributes[:homephone]
+  end
+
+  def zipcode
+    Zipcode.clean(dirty_zipcode)
+  end
+
+  def phone_number
+    PhoneNumber.new(dirty_phone_number)
+  end
+
+  def address
+    street
+  end
+
+end
 
 class Zipcode
   def self.clean(dirty_zipcode)
@@ -27,26 +55,5 @@ INVALID_NUMBER = "0000000000"
   def to_s
     @phone_number
   end
-end
-
-class Attendee < OpenStruct
-
-  def initialize(attributes)
-    # Clean the attributes data?
-    super
-  end
-
-  def full_name
-    [first_name, last_name].join(' ')
-  end
-
-  def zipcode
-    Zipcode.clean(super)
-  end
-
-  def phone_number
-    PhoneNumber.new(homephone)
-  end
-
 end
 

@@ -29,6 +29,17 @@ class EventManager
     end
   end
 
+  def print_reg_date
+    attendees.each do |attendee|
+      puts attendee.regdate
+    end
+  end
+
+  def print_email
+    attendees.each do |attendee|
+      puts attendee.email
+    end
+  end
   private
 
   def load_attendees(file)
@@ -37,7 +48,11 @@ class EventManager
 
 end
 
+
+
 em = EventManager.new("event_attendees.csv")
 #em.print_zipcodes
-em.print_phone_numbers
+# em.print_phone_numbers
 #em.print_names
+# em.print_reg_date
+em.print_email
