@@ -1,7 +1,8 @@
 require 'csv'
 
 class Queue
-  HEADERS = ["last_name", "first_name", "email_address", "zipcode", "city", "state", "street", 'homephone']
+  HEADERS = ["last_name", "first_name", "email_address",
+            "zipcode", "city", "state", "street", 'homephone']
 
   attr_accessor :queue
 
@@ -12,7 +13,7 @@ class Queue
   def call(params)
     "Running 'Queue "  + "#{params[0..1].join(' ').capitalize}'"
     case params[0..1].join(" ")
-      when "count" then count(queue)
+      when "count" then count(self.queue)
       when "clear" then clear(queue)
       when "print" then print(queue)
       when "print by" then print_by(queue, params[-1])
@@ -21,51 +22,70 @@ class Queue
   end
 
   def count(queue)
-    "There are #{queue.size} attendee records in your Queue."
+    "There are #{queue.size unless queue == ""} attendee records in your Queue."
   end
 
   def clear(queue)
-    empty_queue = queue.clear
-    "Your Queue is cleared. There are #{empty_queue.size} attendee records left."
+    if queue.any?
+      empty_queue = queue.clear
+      "Queue cleared. There are #{empty_queue.size} attendee records left."
+    else
+      "Queue is already empty"
+    end
   end
 
   def print(queue)
-    output = queue.map do |attendee|
-      [attendee.last_name, attendee.first_name, attendee.email_address, attendee.zipcode,
-      attendee.city, attendee.state, attendee.address, attendee.phone_number].join("\t\t") + "\n"
+    if queue.any?
+      output = queue.map do |attendee|
+        [attendee.last_name, attendee.first_name,
+        attendee.email_address, attendee.zipcode,
+        attendee.city, attendee.state, attendee.address,
+        attendee.phone_number].join("\t\t") + "\n"
+      end
+      puts output.unshift(HEADERS.join("\t\t") + "\n")
+      "Here are all the attendee records in your Queue"
+    else
+      "Nothing to print"
     end
-    puts output.unshift(HEADERS.join("\t\t") + "\n")
-    "Here are all the attendee records in your Queue"
   end
 
   def print_by(queue, attribute)
-    output = queue.sort_by do |attendee|
-      attendee.send(attribute)
+    if !queue.any?
+      "Nothing in the Queue"
+    else
+      output = queue.sort_by do |attendee|
+        attendee.send(attribute)
+      end
+      puts "Sorting by #{attribute}"
+      print output
+      "Here are all the attendee records sorted by #{attribute}"
     end
-    puts "Sorting by #{attribute}"
-    print output
-    "Here are all the attendee records sorted by #{attribute}"
   end
 
   def save_to(queue, filename)
-
-    CSV.open(filename, "w") do |csv|
-      csv << HEADERS
-      queue.each do |attendee|
-        csv << [attendee.last_name, attendee.first_name, attendee.email_address, attendee.zipcode,
-                attendee.city, attendee.state, attendee.address, attendee.phone_number]
-      end
+    if queue.any?
+      CSV.open(filename, "w") do |csv|
+        csv << HEADERS
+        queue.each do |attendee|
+          csv << [attendee.last_name, attendee.first_name,
+                  attendee.email_address, attendee.zipcode,
+                  attendee.city, attendee.state, attendee.address,
+                  attendee.phone_number]
+          end
+          "The attendee records have been saved to file name '#{filename}'"
+        end
+    else
+      HEADERS.join(", ")
     end
-    "The attendee records in your Queue have been saved successfully under file name '#{filename}'"
   end
 
-  def self.valid_parameters?(parameters)
-    if !%w(count clear print save).include?(parameters[0])
+  def self.valid_parameters?(params)
+    if !%w(count clear print save).include?(params[0])
       false
-    elsif parameters[0] == "print"
-      parameters.count == 1 || (parameters[1] == "by" && parameters.count == 3 )
-    elsif parameters[0] == "save"
-      parameters[1] == "to" && parameters.count == 3
+    elsif params[0] == "print"
+      params.count == 1 || (params[1] == "by" && params.count == 3 )
+    elsif params[0] == "save"
+      params[1] == "to" && params.count == 3
     else
       true
     end

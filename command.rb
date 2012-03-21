@@ -34,13 +34,13 @@ ALL_COMMANDS = {"load" => "loads a new file",
       Help.for(parameters)
     elsif command == "find" && Search.valid_parameters?(parameters)
       queue.queue = Search.for(parameters, base_data)
-     else
+    else
       error_message_for(command)
     end
   end
 
   def error_message_for(command)
-    "Sorry, '#{command}' is not a valid command, maybe pray for it in the next release? Run 'help' for available commands"
+    "Sorry, '#{command}' is not a valid command"
   end
 end
 
